@@ -17,13 +17,13 @@
  *                             helper functions                              *
  *****************************************************************************/
 
-inline double
+static inline double
 rand_uniform(double a, double b)
 {
     return a + (b-a)*rand()/(double)RAND_MAX; // Uniform(a,b)
 }
 
-inline double 
+static inline double 
 rand_normal(double mu, double sigma2) 
 {
     // Marsaglia polar method
