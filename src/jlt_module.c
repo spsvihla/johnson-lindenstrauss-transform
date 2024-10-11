@@ -42,7 +42,7 @@ rand_normal(double mu, double sigma2)
 /* convenience wrapper for cblas_dgemm */
 static inline PyArrayObject*
 _cblas_dgemm(double a, PyArrayObject *A_arr, PyArrayObject *X_arr, 
-                    double b, PyArrayObject *B_arr)
+             double b, PyArrayObject *B_arr)
 {
     double *A = (double *)PyArray_DATA(A_arr);
     double *X = (double *)PyArray_DATA(X_arr);
@@ -95,7 +95,49 @@ _PyArray_ZEROS(npy_intp dim1, npy_intp dim2)
  *                     top-level method definitions                          *
  *****************************************************************************/
 
-/* Johnson-Lindenstrauss transform */
+/**
+ * @brief Computes the Johnson-Lindenstrauss transform for dimensionality 
+ *        reduction.
+ *
+ * This function takes a 2D NumPy array and projects it onto a lower-
+ * dimensional space using a random Gaussian matrix, ensuring that the distance 
+ * between points in the high-dimensional space is approximately preserved in 
+ * the lower-dimensional space. The reduced dimensionality is specified by the 
+ * `new_dim` parameter.
+ *
+ * @param self Python module object (unused in this function).
+ * @param args Python tuple containing:
+ *             - `input_arr` (PyArrayObject*): 2D NumPy array to be transformed.
+ *             - `new_dim` (npy_intp): Target number of dimensions for the 
+ *                                     output array.
+ *
+ * @return PyObject* A 2D NumPy array containing the transformed data. 
+ *         Returns NULL if any error occurs, with an appropriate Python 
+ *         exception set.
+ *
+ * @exception RuntimeError If input tuple parsing fails.
+ * @exception ValueError If the input array is not 2-dimensional.
+ * @exception MemoryError If memory allocation for the transformation or output 
+ *                        array fails.
+ *
+ * The function uses the following steps:
+ * 1. Validates input parameters and checks that the input array is 
+ *    2-dimensional.
+ * 2. Allocates memory for the transformation matrix, filling it with random 
+ *    Gaussian values.
+ * 3. Allocates memory for the output array and performs the matrix 
+ *    multiplication with the input array.
+ * 4. Returns the output array, which is the result of the Johnson-
+ *    Lindenstrauss transform.
+ *
+ * @note The random Gaussian matrix is generated with standard normal 
+ *       distribution sampled using the Marsaglia polar method.
+ * 
+ * @see https://en.wikipedia.org/wiki/Johnson%E2%80%93Lindenstrauss_lemma for 
+ *      general information on the Johnson-Lindenstrauss transform.
+ * @see http://arxiv.org/abs/2103.00564 for an overview of the theory and use 
+ *      of the Johnson-Lindenstrauss transform.
+ */
 static PyObject*
 jl(PyObject *self, PyObject *args)
 {
@@ -147,7 +189,52 @@ jl(PyObject *self, PyObject *args)
     return (PyObject *)output_arr;
 }
 
-/* Fast Johnson-Lindenstrauss transform */
+/**
+ * @brief Computes the Fast Johnson-Lindenstrauss transform using a sparse 
+ *        random projection matrix.
+ *
+ * This function applies a faster variant of the Johnson-Lindenstrauss transform 
+ * by leveraging a sparse random matrix where each entry is drawn from a 
+ * distribution that produces either -1, 0, or 1, with probabilities 1/6, 2/3, 
+ * and 1/6, respectively. The method is used for efficient dimensionality 
+ * reduction with reduced computational cost compared to a dense Gaussian 
+ * matrix.
+ *
+ * @param self Python module object (unused in this function).
+ * @param args Python tuple containing:
+ *             - `input_arr` (PyArrayObject*): 2D NumPy array to be transformed.
+ *             - `new_dim` (npy_intp): Target number of dimensions for the 
+ *                                     output array.
+ *
+ * @return PyObject* A 2D NumPy array containing the transformed data.
+ *         Returns NULL if any error occurs, with an appropriate Python 
+ *         exception set.
+ *
+ * @exception RuntimeError If input tuple parsing fails.
+ * @exception ValueError If the input array is not 2-dimensional.
+ * @exception MemoryError If memory allocation for the transformation or output 
+ *                        array fails.
+ *
+ * The function uses the following steps:
+ * 1. Validates input parameters and checks that the input array is 
+ *    2-dimensional.
+ * 2. Allocates memory for the transformation matrix, filling it with values 
+ *    from a sparse distribution:
+ *    - Each entry in the transformation matrix is randomly set to -1, 0, or 1.
+ * 3. Allocates memory for the output array and performs the matrix 
+ *    multiplication with the input array.
+ * 4. Returns the output array, which is the result of the Fast Johnson-
+ *    Lindenstrauss transform.
+ *
+ * @note The sparse transformation matrix uses entries drawn from {-1, 0, 1}, 
+ *       which significantly reduces the computation time and memory 
+ *       requirements compared to the standard Johnson-Lindenstrauss transform.
+ *
+ * @see https://en.wikipedia.org/wiki/Johnson%E2%80%93Lindenstrauss_lemma for 
+ *      more information on the Johnson-Lindenstrauss transform.
+ * @see http://arxiv.org/abs/2103.00564 for an overview of the theory and use 
+ *      of the Johnson-Lindenstrauss transform.
+ */
 static PyObject*
 fastjl(PyObject *self, PyObject *args)
 {
