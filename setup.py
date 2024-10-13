@@ -24,9 +24,9 @@ ext_mod = Extension(
 
 setup(
     name=PKG,
-    url="https://github.com/spsvihla/algorithms-toolbox",
+    url="https://github.com/spsvihla/jlt",
     version='0.1',
-    description='A collection of algorithms in Python',
+    description='Johnson-Lindenstrauss transform for dimensionality reduction',
     author='Sean Svihla',
     setup_requires=["numpy"],
     install_requires=[
