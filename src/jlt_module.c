@@ -54,7 +54,7 @@ _cblas_dgemm(const CBLAS_TRANSPOSE transA,
     int d = (int)PyArray_DIM(A_arr, 1);
     int n = (int)PyArray_DIM(X_arr, 1); 
 
-    cblas_dgemm(CblasRowMajor, transA, transB,
+    cblas_dgemm(CblasRowMajor, transA, transX,
                 k, n, d,         // m = k, n = n, k = d
                 a,               // Scaling factor for A
                 A, d,            // 'lda' = leading dimension of A (d)
