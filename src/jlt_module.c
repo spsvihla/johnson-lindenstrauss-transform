@@ -41,7 +41,9 @@ rand_normal(double mu, double sigma2)
 
 /* convenience wrapper for cblas_dgemm */
 static inline PyArrayObject*
-_cblas_dgemm(double a, PyArrayObject *A_arr, PyArrayObject *X_arr, 
+_cblas_dgemm(const CBLAS_TRANSPOSE transA,
+             const CBLAS_TRANSPOSE transX,
+             double a, PyArrayObject *A_arr, PyArrayObject *X_arr, 
              double b, PyArrayObject *B_arr)
 {
     double *A = (double *)PyArray_DATA(A_arr);
@@ -52,7 +54,7 @@ _cblas_dgemm(double a, PyArrayObject *A_arr, PyArrayObject *X_arr,
     int d = (int)PyArray_DIM(A_arr, 1);
     int n = (int)PyArray_DIM(X_arr, 1); 
 
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+    cblas_dgemm(CblasRowMajor, transA, transB,
                 k, n, d,         // m = k, n = n, k = d
                 a,               // Scaling factor for A
                 A, d,            // 'lda' = leading dimension of A (d)
